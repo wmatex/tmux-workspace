@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+
+	"github.com/wmatex/automux/internal/projects"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 const APP_NAME = "automux"
@@ -26,7 +30,14 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(viper.GetStringSlice("projects.lookup_dirs"))
+		projectDirs := viper.GetStringSlice("projects.lookup_dirs")
+
+		p, err := projects.LoadAllProjects(projectDirs)
+		if err != nil {
+			log.Fatalf("cannot load all projects: %s\n", err)
+		}
+
+		fmt.Println(p)
 	},
 }
 
