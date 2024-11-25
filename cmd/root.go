@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/wmatex/automux/internal/cmd_exec/fzf"
+	"github.com/wmatex/automux/internal/cmd_exec/tmux"
 	"github.com/wmatex/automux/internal/projects"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -37,7 +39,22 @@ to quickly create a Cobra application.`,
 			log.Fatalf("cannot load all projects: %s\n", err)
 		}
 
-		fmt.Println(p)
+		project, err := fzf.ProjectPick(p)
+		if err != nil {
+			log.Fatalf("fzf failed: %s\n", err)
+		}
+
+		fmt.Println(project)
+
+		err = tmux.NewSession(project)
+		if err != nil {
+			log.Fatalf("cannot create new tmux session '%s': %s\n", project, err)
+		}
+
+		err = tmux.SwitchToSession(project)
+		if err != nil {
+			log.Fatalf("cannot switch to session '%s': %s\n", project, err)
+		}
 	},
 }
 
