@@ -1,7 +1,6 @@
 package fzf
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/wmatex/automux/internal/cmd_exec"
@@ -14,27 +13,36 @@ func createCmdBuilder() *cmd_exec.CmdExecBuilder {
 		"--print-query",
 		"--tmux", "center",
 		"--bind", "enter:replace-query+print-query",
+		"--bind", "esc:abort",
 	})
 }
 
 func ProjectPick(projects []*projects.Project) (string, error) {
 	var input []string
 	for _, p := range projects {
-		input = append(input, fmt.Sprintf("%s %s", (*p).Name, (*p).Path))
+		input = append(input, (*p).Format())
 	}
 
-	output, err := createCmdBuilder().
+	output, err, code := createCmdBuilder().
 		SetInput(input).
-		AddArguments([]string{"-d", "\\s", "--nth", "1"}).
+		AddArguments([]string{"-d", "\\s", "--nth", "2", "--ansi", "--highlight-line"}).
 		ExecWithOutput()
 
 	if err != nil {
-		return "", err
+		if code == 130 {
+			return "", nil
+		} else if code != 1 {
+			return "", err
+		}
 	}
 
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 	lastLine := lines[len(lines)-1]
 
 	parts := strings.Split(lastLine, " ")
-	return parts[0], nil
+	if len(parts) < 2 {
+		return parts[0], nil
+	}
+
+	return parts[1], nil
 }

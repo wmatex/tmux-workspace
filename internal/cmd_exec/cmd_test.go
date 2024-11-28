@@ -11,8 +11,9 @@ func TestExec(t *testing.T) {
 	args := []string{"hello"}
 	cmd := NewCmdExec(prog, args)
 
-	err := cmd.Exec()
+	err, code := cmd.Exec()
 	assert.Nil(t, err)
+	assert.Equal(t, code, 0)
 }
 
 func TestExecWithOutput(t *testing.T) {
@@ -20,8 +21,9 @@ func TestExecWithOutput(t *testing.T) {
 	args := []string{"hello"}
 	cmd := NewCmdExec(prog, args)
 
-	output, err := cmd.ExecWithOutput()
+	output, err, code := cmd.ExecWithOutput()
 	assert.Nil(t, err)
+	assert.Equal(t, code, 0)
 
 	expectedOutput := "hello\n"
 	assert.Equalf(t, expectedOutput, output, "expected %s, got %s", expectedOutput, output)

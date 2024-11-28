@@ -22,11 +22,15 @@ func createCmdBuilder(args []string) *cmd_exec.CmdExecBuilder {
 	return cmd_exec.NewCmdExec("tmux", args)
 }
 
-func NewSession(name, path string) error {
-	return createCmdBuilder([]string{"new-session", "-d", "-s", name, "-c", path}).Exec()
+func NewSession(name, path string) (error, int) {
+	if path != "" {
+		return createCmdBuilder([]string{"new-session", "-d", "-s", name, "-c", path}).Exec()
+	} else {
+		return createCmdBuilder([]string{"new-session", "-d", "-s", name}).Exec()
+	}
 }
 
-func SwitchToSession(name string) error {
+func SwitchToSession(name string) (error, int) {
 	return createCmdBuilder([]string{"switch-client", "-t", name}).Exec()
 }
 
@@ -37,7 +41,7 @@ func GetActiveSessions() ([]Session, error) {
 		fmt.Sprintf("#S%[1]s#{session_attached}%[1]s#{session_path}%[1]s#{session_activity}", SEPARATOR),
 	})
 
-	output, err := cmd.ExecWithOutput()
+	output, err, _ := cmd.ExecWithOutput()
 	if err != nil {
 		return nil, err
 	}

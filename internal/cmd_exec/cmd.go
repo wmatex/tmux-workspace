@@ -37,15 +37,32 @@ func (c *CmdExecBuilder) exec() *exec.Cmd {
 	return cmd
 }
 
-func (c *CmdExecBuilder) ExecWithOutput() (string, error) {
+func (c *CmdExecBuilder) ExecWithOutput() (string, error, int) {
 	cmd := c.exec()
 
 	out, err := cmd.Output()
-	return string(out), err
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return string(out), exitErr, exitErr.ExitCode()
+		} else {
+			return string(out), err, 1
+		}
+	}
+
+	return string(out), err, 0
 }
 
-func (c *CmdExecBuilder) Exec() error {
+func (c *CmdExecBuilder) Exec() (error, int) {
 	cmd := c.exec()
 
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return exitErr, exitErr.ExitCode()
+		} else {
+			return err, 1
+		}
+	}
+
+	return nil, 0
 }

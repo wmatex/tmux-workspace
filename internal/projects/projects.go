@@ -33,22 +33,21 @@ func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) []*Project
 		}
 	}
 
-	var names []string
 	for n := range p.Map {
-		names = append(names, n)
+		p.sortedKeys = append(p.sortedKeys, n)
 	}
-	slices.SortFunc(names, func(a, b string) int {
+	slices.SortFunc(p.sortedKeys, func(a, b string) int {
 		pA := p.Map[a]
 		pB := p.Map[b]
 
 		if pA.LastActive == pB.LastActive {
-			return strings.Compare(pA.Name, pB.Name)
+			return strings.Compare(strings.ToLower(pA.Name), strings.ToLower(pB.Name))
 		}
 
 		return pB.LastActive - pA.LastActive
 	})
 
-	for _, name := range names {
+	for _, name := range p.sortedKeys {
 		project := p.Map[name]
 		if !project.Active {
 			result = append(result, project)

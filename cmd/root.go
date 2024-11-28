@@ -51,18 +51,26 @@ to quickly create a Cobra application.`,
 			log.Fatalf("fzf failed: %s\n", err)
 		}
 
-		project := p.Map[projectName]
+		if projectName == "" {
+			os.Exit(0)
+		}
 
-		if !project.Running {
-			err = tmux.NewSession(project.Name, project.Path)
+		project, ok := p.Map[projectName]
+		if !ok {
+			err, _ = tmux.NewSession(projectName, "")
+			if err != nil {
+				log.Fatalf("cannot create new tmux session '%s': %s\n", projectName, err)
+			}
+		} else if !project.Running {
+			err, _ = tmux.NewSession(project.Name, project.Path)
 			if err != nil {
 				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
 			}
 		}
 
-		err = tmux.SwitchToSession(project.Name)
+		err, _ = tmux.SwitchToSession(projectName)
 		if err != nil {
-			log.Fatalf("cannot switch to session '%s': %s\n", project.Name, err)
+			log.Fatalf("cannot switch to session '%s': %s\n", projectName, err)
 		}
 	},
 }
