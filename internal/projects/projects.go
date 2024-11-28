@@ -19,15 +19,17 @@ func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) []*Project
 		_, ok := (*p).Map[s.Name]
 		if !ok {
 			p.Map[s.Name] = &Project{
-				Name:    s.Name,
-				Path:    s.Path,
-				Active:  s.Active,
-				Running: true,
+				Name:       s.Name,
+				Path:       s.Path,
+				Active:     s.Active,
+				Running:    true,
+				LastActive: s.LastActivity,
 			}
 		} else {
 			p.Map[s.Name].Path = s.Path
 			p.Map[s.Name].Active = s.Active
 			p.Map[s.Name].Running = true
+			p.Map[s.Name].LastActive = s.LastActivity
 		}
 	}
 
@@ -39,24 +41,18 @@ func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) []*Project
 		pA := p.Map[a]
 		pB := p.Map[b]
 
-		if pA.Running && pB.Running {
+		if pA.LastActive == pB.LastActive {
 			return strings.Compare(pA.Name, pB.Name)
 		}
 
-		if pA.Running {
-			return -1
-		}
-
-		if pB.Running {
-			return 1
-		}
-
-		return strings.Compare(pA.Name, pB.Name)
+		return pB.LastActive - pA.LastActive
 	})
 
 	for _, name := range names {
 		project := p.Map[name]
-		result = append(result, project)
+		if !project.Active {
+			result = append(result, project)
+		}
 	}
 
 	return result

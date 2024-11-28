@@ -10,10 +10,11 @@ import (
 )
 
 type Project struct {
-	Name    string
-	Path    string
-	Running bool
-	Active  bool
+	Name       string
+	Path       string
+	Running    bool
+	Active     bool
+	LastActive int
 }
 
 func LoadAllProjects(directories []string) (*Projects, error) {
@@ -48,8 +49,9 @@ func loadProjectsInDirectory(dir string) ([]Project, error) {
 	for _, file := range files {
 		if file.IsDir() {
 			p := Project{
-				Name: file.Name(),
-				Path: filepath.Join(dir, file.Name()),
+				Name:       file.Name(),
+				Path:       filepath.Join(dir, file.Name()),
+				LastActive: 0,
 			}
 			projects = append(projects, p)
 		}

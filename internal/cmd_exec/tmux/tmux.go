@@ -2,6 +2,8 @@ package tmux
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 	"strings"
 
 	"github.com/wmatex/automux/internal/cmd_exec"
@@ -10,9 +12,10 @@ import (
 const SEPARATOR = "|"
 
 type Session struct {
-	Name   string
-	Active bool
-	Path   string
+	Name         string
+	Active       bool
+	Path         string
+	LastActivity int
 }
 
 func createCmdBuilder(args []string) *cmd_exec.CmdExecBuilder {
@@ -28,7 +31,11 @@ func SwitchToSession(name string) error {
 }
 
 func GetActiveSessions() ([]Session, error) {
-	cmd := createCmdBuilder([]string{"list-sessions", "-F", fmt.Sprintf("#S%[1]s#{session_attached}%[1]s#{session_path}", SEPARATOR)})
+	cmd := createCmdBuilder([]string{
+		"list-sessions",
+		"-F",
+		fmt.Sprintf("#S%[1]s#{session_attached}%[1]s#{session_path}%[1]s#{session_activity}", SEPARATOR),
+	})
 
 	output, err := cmd.ExecWithOutput()
 	if err != nil {
@@ -45,10 +52,15 @@ func GetActiveSessions() ([]Session, error) {
 			active = true
 		}
 
+		lastActivity, err := strconv.Atoi(parts[3])
+		if err != nil {
+			log.Fatalf("cannot parse last activity time: %s\n", err)
+		}
 		session := Session{
-			Name:   parts[0],
-			Active: active,
-			Path:   parts[2],
+			Name:         parts[0],
+			Active:       active,
+			Path:         parts[2],
+			LastActivity: lastActivity,
 		}
 		sessions = append(sessions, session)
 	}
