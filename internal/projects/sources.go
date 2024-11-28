@@ -47,7 +47,7 @@ func loadProjectsInDirectory(dir string) ([]Project, error) {
 	}
 
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() && file.Name()[0] != '.' {
 			p := Project{
 				Name:       file.Name(),
 				Path:       filepath.Join(dir, file.Name()),
