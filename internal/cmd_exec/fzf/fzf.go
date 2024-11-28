@@ -1,9 +1,11 @@
 package fzf
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/wmatex/automux/internal/cmd_exec"
+	"github.com/wmatex/automux/internal/projects"
 )
 
 func createCmdBuilder() *cmd_exec.CmdExecBuilder {
@@ -15,9 +17,15 @@ func createCmdBuilder() *cmd_exec.CmdExecBuilder {
 	})
 }
 
-func ProjectPick(projects []string) (string, error) {
+func ProjectPick(projects []*projects.Project) (string, error) {
+	var input []string
+	for _, p := range projects {
+		input = append(input, fmt.Sprintf("%s %s", (*p).Name, (*p).Path))
+	}
+
 	output, err := createCmdBuilder().
-		SetInput(projects).
+		SetInput(input).
+		AddArguments([]string{"-d", "\\s", "--nth", "1"}).
 		ExecWithOutput()
 
 	if err != nil {
@@ -25,5 +33,8 @@ func ProjectPick(projects []string) (string, error) {
 	}
 
 	lines := strings.Split(strings.TrimSpace(output), "\n")
-	return lines[len(lines)-1], nil
+	lastLine := lines[len(lines)-1]
+
+	parts := strings.Split(lastLine, " ")
+	return parts[0], nil
 }

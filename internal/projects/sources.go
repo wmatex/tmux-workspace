@@ -1,28 +1,44 @@
 package projects
 
 import (
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
+
+	homedir "github.com/mitchellh/go-homedir"
 )
 
-func LoadAllProjects(directories []string) ([]string, error) {
-	var projects []string
+type Project struct {
+	Name    string
+	Path    string
+	Running bool
+	Active  bool
+}
+
+func LoadAllProjects(directories []string) (*Projects, error) {
+	projects := Projects{
+		Map: make(map[string]*Project),
+	}
 
 	for _, dir := range directories {
-		subdirectories, err := loadSubdirectories(dir)
+		absolutePath := transformPath(dir)
+		projectList, err := loadProjectsInDirectory(absolutePath)
 
 		if err != nil {
 			return nil, err
 		}
 
-		projects = append(projects, subdirectories...)
+		for _, p := range projectList {
+			projects.Map[p.Name] = &p
+		}
 	}
 
-	return projects, nil
+	return &projects, nil
 }
 
-func loadSubdirectories(dir string) ([]string, error) {
-	var subdirs []string
+func loadProjectsInDirectory(dir string) ([]Project, error) {
+	var projects []Project
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
@@ -31,9 +47,22 @@ func loadSubdirectories(dir string) ([]string, error) {
 
 	for _, file := range files {
 		if file.IsDir() {
-			subdirs = append(subdirs, filepath.Join(dir, file.Name()))
+			p := Project{
+				Name: file.Name(),
+				Path: filepath.Join(dir, file.Name()),
+			}
+			projects = append(projects, p)
 		}
 	}
 
-	return subdirs, nil
+	return projects, nil
+}
+
+func transformPath(dir string) string {
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatalf("cannot get home dir: %s\n", err)
+	}
+
+	return strings.ReplaceAll(dir, "~", home)
 }

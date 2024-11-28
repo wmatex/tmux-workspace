@@ -39,21 +39,30 @@ to quickly create a Cobra application.`,
 			log.Fatalf("cannot load all projects: %s\n", err)
 		}
 
-		project, err := fzf.ProjectPick(p)
+		sessions, err := tmux.GetActiveSessions()
+		if err != nil {
+			log.Fatalf("cannot get active sessions: %s\n", err)
+		}
+
+		merged := p.MergeProjectsWithSessions(sessions)
+
+		projectName, err := fzf.ProjectPick(merged)
 		if err != nil {
 			log.Fatalf("fzf failed: %s\n", err)
 		}
 
-		fmt.Println(project)
+		project := p.Map[projectName]
 
-		err = tmux.NewSession(project)
-		if err != nil {
-			log.Fatalf("cannot create new tmux session '%s': %s\n", project, err)
+		if !project.Running {
+			err = tmux.NewSession(project.Name, project.Path)
+			if err != nil {
+				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
+			}
 		}
 
-		err = tmux.SwitchToSession(project)
+		err = tmux.SwitchToSession(project.Name)
 		if err != nil {
-			log.Fatalf("cannot switch to session '%s': %s\n", project, err)
+			log.Fatalf("cannot switch to session '%s': %s\n", project.Name, err)
 		}
 	},
 }
