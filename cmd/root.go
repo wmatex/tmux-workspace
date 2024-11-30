@@ -108,8 +108,8 @@ func initConfig() {
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(configPath)
-		viper.SetConfigType("toml")
-		viper.SetConfigName("config.toml")
+		viper.SetConfigType("yaml")
+		viper.SetConfigName(fmt.Sprintf("%s.yaml", APP_NAME))
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
