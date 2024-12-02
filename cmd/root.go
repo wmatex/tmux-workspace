@@ -72,10 +72,15 @@ to quickly create a Cobra application.`,
 			if err != nil {
 				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
 			}
+
+			valid := allRules.GetSatisfied(project)
+			windows := rules.MergeWindows(valid)
+
+			err := tmux.CreateWindowsForProject(project.Name, project.Path, windows)
+			if err != nil {
+				log.Fatalf("cannot create windows: %s\n", err)
+			}
 		}
-		valid := allRules.GetSatisfied(project)
-		windows := rules.MergeWindows(valid)
-		fmt.Println(windows)
 
 		err, _ = tmux.SwitchToSession(projectName)
 		if err != nil {

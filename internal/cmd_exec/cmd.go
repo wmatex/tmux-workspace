@@ -1,6 +1,7 @@
 package cmd_exec
 
 import (
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -33,6 +34,7 @@ func (c *CmdExecBuilder) exec() *exec.Cmd {
 	if len(c.input) > 0 {
 		cmd.Stdin = strings.NewReader(strings.Join(c.input, "\n"))
 	}
+	cmd.Stderr = os.Stderr
 
 	return cmd
 }

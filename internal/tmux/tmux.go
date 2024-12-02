@@ -50,12 +50,91 @@ func createCmdBuilder(args []string) *cmd_exec.CmdExecBuilder {
 	return cmd_exec.NewCmdExec("tmux", args)
 }
 
+func windowTarget(session string, window int) string {
+	return fmt.Sprintf("%s:%d", session, window)
+}
+
+func paneTarget(windowID string, pane int) string {
+	return fmt.Sprintf("%s.%d", windowID, pane)
+}
+
 func NewSession(name, path string) (error, int) {
 	if path != "" {
 		return createCmdBuilder([]string{"new-session", "-d", "-s", name, "-c", path}).Exec()
 	} else {
 		return createCmdBuilder([]string{"new-session", "-d", "-s", name}).Exec()
 	}
+}
+
+func CreateWindowsForProject(session, path string, windows []*Window) error {
+	for i, w := range windows {
+		windowId := windowTarget(session, i+1)
+		err, _ := CreateWindow(windowId, w.Name, path)
+		if err != nil {
+			return err
+		}
+
+		for j, p := range w.Panes {
+			paneId := paneTarget(windowId, j)
+			if j > 0 {
+				err, _ := CreatePane(windowId, paneId, path)
+				if err != nil {
+					return err
+				}
+			}
+
+			err, _ := RunCommandInPane(paneId, p.Cmd)
+			if err != nil {
+				return err
+			}
+		}
+
+		SelectLayout(windowId)
+	}
+
+	SelectWindow(windowTarget(session, 1))
+
+	return nil
+}
+
+func CreateWindow(id, name, path string) (error, int) {
+	return createCmdBuilder([]string{
+		"new-window", "-k",
+		"-c", path,
+		"-n", name,
+		"-t", id,
+	}).Exec()
+}
+
+func SelectWindow(id string) (error, int) {
+	return createCmdBuilder([]string{
+		"select-window",
+		"-t", id,
+	}).Exec()
+}
+
+func SelectLayout(windowId string) (error, int) {
+	return createCmdBuilder([]string{
+		"select-layout",
+		"-t", windowId,
+		"main-vertical",
+	}).Exec()
+}
+
+func CreatePane(windowId, id, path string) (error, int) {
+	return createCmdBuilder([]string{
+		"split-window",
+		"-t", windowId,
+		"-c", path,
+	}).Exec()
+}
+
+func RunCommandInPane(id, cmd string) (error, int) {
+	return createCmdBuilder([]string{
+		"send-keys",
+		"-t", id,
+		cmd, "C-m",
+	}).Exec()
 }
 
 func SwitchToSession(name string) (error, int) {
