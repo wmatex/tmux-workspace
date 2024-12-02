@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/wmatex/automux/internal/cmd_exec"
+	"github.com/wmatex/automux/internal/utils"
 )
 
 const SEPARATOR = "|"
@@ -16,6 +17,33 @@ type Session struct {
 	Active       bool
 	Path         string
 	LastActivity int
+}
+
+type Pane struct {
+	Cmd string
+}
+
+type Window struct {
+	Name  string
+	Panes []*Pane
+}
+
+func (w *Window) Merge(o *Window) {
+	panes := w.Panes
+	panes = append(panes, o.Panes...)
+	w.Panes = utils.Merge(panes)
+}
+
+func (w *Window) Id() string {
+	return w.Name
+}
+
+func (p *Pane) Merge(o *Pane) {
+	// No action required
+}
+
+func (p *Pane) Id() string {
+	return p.Cmd
 }
 
 func createCmdBuilder(args []string) *cmd_exec.CmdExecBuilder {

@@ -6,9 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wmatex/automux/internal/cmd_exec/fzf"
-	"github.com/wmatex/automux/internal/cmd_exec/tmux"
+	"github.com/wmatex/automux/internal/fzf"
 	"github.com/wmatex/automux/internal/projects"
+	"github.com/wmatex/automux/internal/rules"
+	"github.com/wmatex/automux/internal/tmux"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -33,6 +34,11 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		projectDirs := viper.GetStringSlice("projects.lookup_dirs")
+
+		allRules, err := rules.LoadFromConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		p, err := projects.LoadAllProjects(projectDirs)
 		if err != nil {
@@ -67,6 +73,9 @@ to quickly create a Cobra application.`,
 				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
 			}
 		}
+		valid := allRules.GetSatisfied(project)
+		windows := rules.MergeWindows(valid)
+		fmt.Println(windows)
 
 		err, _ = tmux.SwitchToSession(projectName)
 		if err != nil {
