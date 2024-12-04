@@ -17,6 +17,7 @@ import (
 )
 
 const APP_NAME = "automux"
+const DEFAULT_LAYOUT = "main-vertical"
 
 var cfgFile string
 
@@ -33,25 +34,10 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		projectDirs := viper.GetStringSlice("projects.lookup_dirs")
+		windowLayout := viper.GetString("projects.layout")
+		p, allRules := initProjectsAndRules()
 
-		allRules, err := rules.LoadFromConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		p, err := projects.LoadAllProjects(projectDirs)
-		if err != nil {
-			log.Fatalf("cannot load all projects: %s\n", err)
-		}
-
-		sessions, err := tmux.GetActiveSessions()
-		if err != nil {
-			log.Fatalf("cannot get active sessions: %s\n", err)
-		}
-
-		merged := p.MergeProjectsWithSessions(sessions)
-
+		merged := p.GetNotActiveProjects()
 		projectName, err := fzf.ProjectPick(merged)
 		if err != nil {
 			log.Fatalf("fzf failed: %s\n", err)
@@ -81,7 +67,7 @@ to quickly create a Cobra application.`,
 				log.Fatalf("cannot setup hooks for project: %s\n", err)
 			}
 
-			err = tmux.CreateWindowsForProject(project.Name, project.Path, windows)
+			err = tmux.CreateWindowsForProject(project.Name, project.Path, windowLayout, windows)
 			if err != nil {
 				log.Fatalf("cannot create windows: %s\n", err)
 			}
@@ -101,6 +87,29 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
+}
+
+func initProjectsAndRules() (*projects.Projects, *rules.Rules) {
+	projectDirs := viper.GetStringSlice("projects.lookup_dirs")
+
+	allRules, err := rules.LoadFromConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	p, err := projects.LoadAllProjects(projectDirs)
+	if err != nil {
+		log.Fatalf("cannot load all projects: %s\n", err)
+	}
+
+	sessions, err := tmux.GetActiveSessions()
+	if err != nil {
+		log.Fatalf("cannot get active sessions: %s\n", err)
+	}
+
+	p.MergeProjectsWithSessions(sessions)
+
+	return p, allRules
 }
 
 func init() {

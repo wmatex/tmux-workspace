@@ -12,9 +12,7 @@ type Projects struct {
 	sortedKeys []string
 }
 
-func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) []*Project {
-	var result []*Project
-
+func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) {
 	for _, s := range sessions {
 		_, ok := (*p).Map[s.Name]
 		if !ok {
@@ -46,7 +44,10 @@ func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) []*Project
 
 		return pB.LastActive - pA.LastActive
 	})
+}
 
+func (p *Projects) GetNotActiveProjects() []*Project {
+	var result []*Project
 	for _, name := range p.sortedKeys {
 		project := p.Map[name]
 		if !project.Active {

@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/wmatex/automux/internal/projects"
 	"github.com/wmatex/automux/internal/rules"
-	"github.com/wmatex/automux/internal/tmux"
 )
 
 var projectName string
@@ -23,24 +19,7 @@ var sessionCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		projectDirs := viper.GetStringSlice("projects.lookup_dirs")
-
-		allRules, err := rules.LoadFromConfig()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		p, err := projects.LoadAllProjects(projectDirs)
-		if err != nil {
-			log.Fatalf("cannot load all projects: %s\n", err)
-		}
-
-		sessions, err := tmux.GetActiveSessions()
-		if err != nil {
-			log.Fatalf("cannot get active sessions: %s\n", err)
-		}
-
-		p.MergeProjectsWithSessions(sessions)
+		p, allRules := initProjectsAndRules()
 
 		project, ok := p.Map[projectName]
 		var lifecycle uint8

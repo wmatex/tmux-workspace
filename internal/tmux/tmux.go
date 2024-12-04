@@ -66,7 +66,7 @@ func NewSession(name, path string) (error, int) {
 	}
 }
 
-func CreateWindowsForProject(session, path string, windows []*Window) error {
+func CreateWindowsForProject(session, path, layout string, windows []*Window) error {
 	for i, w := range windows {
 		windowId := windowTarget(session, i+1)
 		err, _ := CreateWindow(windowId, w.Name, path)
@@ -89,7 +89,7 @@ func CreateWindowsForProject(session, path string, windows []*Window) error {
 			}
 		}
 
-		SelectLayout(windowId)
+		SelectLayout(windowId, layout)
 	}
 
 	SelectWindow(windowTarget(session, 1))
@@ -113,11 +113,11 @@ func SelectWindow(id string) (error, int) {
 	}).Exec()
 }
 
-func SelectLayout(windowId string) (error, int) {
+func SelectLayout(windowId, layout string) (error, int) {
 	return createCmdBuilder([]string{
 		"select-layout",
 		"-t", windowId,
-		"main-vertical",
+		layout,
 	}).Exec()
 }
 
