@@ -178,3 +178,19 @@ func GetActiveSessions() ([]Session, error) {
 
 	return sessions, nil
 }
+
+func SetHook(name, cmd string) (error, int) {
+	return createCmdBuilder([]string{
+		"set-hook",
+		"-g", name,
+		fmt.Sprintf("run-shell \"%s\"", cmd),
+	}).Exec()
+}
+
+func Popup(dir, cmd string) (error, int) {
+	return createCmdBuilder([]string{
+		"popup",
+		"-d", dir,
+		"-E", cmd,
+	}).Exec()
+}

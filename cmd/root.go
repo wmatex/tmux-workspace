@@ -76,7 +76,12 @@ to quickly create a Cobra application.`,
 			valid := allRules.GetSatisfied(project)
 			windows := rules.MergeWindows(valid)
 
-			err := tmux.CreateWindowsForProject(project.Name, project.Path, windows)
+			err = rules.SetupHooks(project, valid)
+			if err != nil {
+				log.Fatalf("cannot setup hooks for project: %s\n", err)
+			}
+
+			err = tmux.CreateWindowsForProject(project.Name, project.Path, windows)
 			if err != nil {
 				log.Fatalf("cannot create windows: %s\n", err)
 			}
@@ -100,6 +105,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.AddCommand(sessionCmd)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/automux/config.toml)")
 }
 

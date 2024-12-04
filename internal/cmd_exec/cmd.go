@@ -10,10 +10,11 @@ type CmdExecBuilder struct {
 	prog  string
 	args  []string
 	input []string
+	dir   string
 }
 
 func NewCmdExec(prog string, args []string) *CmdExecBuilder {
-	c := &CmdExecBuilder{prog, args, []string{}}
+	c := &CmdExecBuilder{prog, args, []string{}, ""}
 
 	return c
 }
@@ -29,8 +30,17 @@ func (c *CmdExecBuilder) SetInput(lines []string) *CmdExecBuilder {
 	return c
 }
 
+func (c *CmdExecBuilder) SetWorkingDirectory(dir string) *CmdExecBuilder {
+	c.dir = dir
+
+	return c
+}
+
 func (c *CmdExecBuilder) exec() *exec.Cmd {
 	cmd := exec.Command(c.prog, c.args...)
+	if c.dir != "" {
+		cmd.Dir = c.dir
+	}
 	if len(c.input) > 0 {
 		cmd.Stdin = strings.NewReader(strings.Join(c.input, "\n"))
 	}
@@ -56,6 +66,7 @@ func (c *CmdExecBuilder) ExecWithOutput() (string, error, int) {
 
 func (c *CmdExecBuilder) Exec() (error, int) {
 	cmd := c.exec()
+	cmd.Stdout = os.Stdout
 
 	err := cmd.Run()
 	if err != nil {
