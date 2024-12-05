@@ -2,6 +2,7 @@ package rules
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -39,15 +40,21 @@ func SetupHooks(p *projects.Project, rules []Rule) error {
 	return err
 }
 
-func RunHooks(p *projects.Project, lifecycle uint8, rules []Rule) error {
+func RunHooks(p *projects.Project, lifecycle uint8, rules []Rule) {
 	merged := mergeHooks(lifecycle, rules)
+	ch := make(chan int, len(merged))
 
 	for _, hook := range merged {
-		if err, _ := runHook(p.Path, hook); err != nil {
-			return err
+		go runHook(p.Path, hook, ch)
+	}
+
+	for _, hook := range merged {
+		status := <-ch
+
+		if status != 0 {
+			log.Printf("hook %s failed\n", hook.Cmd)
 		}
 	}
-	return nil
 }
 
 func mergeHooks(lifecycle uint8, rules []Rule) []*Hook {
@@ -76,10 +83,12 @@ func mergeHooks(lifecycle uint8, rules []Rule) []*Hook {
 	return utils.Merge(filtered)
 }
 
-func runHook(dir string, hook *Hook) (error, int) {
+func runHook(dir string, hook *Hook, ch chan int) {
 	cmdParts := strings.Split(hook.Cmd, " ")
-	return cmd_exec.
+	_, status := cmd_exec.
 		NewCmdExec(cmdParts[0], cmdParts[1:]).
 		SetWorkingDirectory(dir).
 		Exec()
+
+	ch <- status
 }
