@@ -31,12 +31,16 @@ func (h *Hook) Merge(o *Hook) {
 }
 
 func SetupHooks(p *projects.Project, rules []Rule) error {
-	err, _ := tmux.Popup(p.Path, fmt.Sprintf("%s session start -p %s", os.Args[0], p.Name))
-	if err != nil {
-		return err
+	merged := mergeHooks(START, rules)
+
+	if len(merged) > 0 {
+		err, _ := tmux.Popup(p.Path, fmt.Sprintf("%s session start -p %s", os.Args[0], p.Name))
+		if err != nil {
+			return err
+		}
 	}
 
-	err, _ = tmux.SetHook("session-closed", fmt.Sprintf("%s session end -p #{hook_session_name}", os.Args[0]))
+	err, _ := tmux.SetHook("session-closed", fmt.Sprintf("%s session end -p #{hook_session_name}", os.Args[0]))
 	return err
 }
 
