@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/wmatex/automux/internal/cmd_exec"
 	"github.com/wmatex/automux/internal/projects"
@@ -99,11 +98,11 @@ func mergeHooks(lifecycle uint8, rules []*Rule) []*Hook {
 }
 
 func runHook(dir string, hook *Hook, ch chan int) {
-	cmdParts := strings.Split(hook.Cmd, " ")
+	cmdArgs := utils.SplitArgs(hook.Cmd)
 	_, status := cmd_exec.
-		NewCmdExec(cmdParts[0], cmdParts[1:]).
+		NewCmdExec(cmdArgs[0], cmdArgs[1:]).
 		SetWorkingDirectory(dir).
-		Exec()
+		Exec(true)
 
 	ch <- status
 }

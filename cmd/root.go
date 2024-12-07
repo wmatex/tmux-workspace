@@ -119,9 +119,7 @@ func init() {
 }
 
 func initConfig() {
-	// Don't forget to read config either from cfgFile or from home directory!
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
 		xdgConfigHome := os.Getenv("XDG_CONFIG_HOME")
@@ -135,14 +133,10 @@ func initConfig() {
 		}
 		configPath := filepath.Join(xdgConfigHome, APP_NAME)
 
-		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(configPath)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(fmt.Sprintf("%s.yaml", APP_NAME))
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
-	}
+	viper.ReadInConfig()
 }

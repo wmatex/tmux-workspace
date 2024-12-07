@@ -48,6 +48,7 @@ func (p *Projects) MergeProjectsWithSessions(sessions []tmux.Session) {
 
 func (p *Projects) GetNotActiveProjects() []*Project {
 	var result []*Project
+
 	for _, name := range p.sortedKeys {
 		project := p.Map[name]
 		if !project.Active {

@@ -26,7 +26,7 @@ func ProjectPick(projects []*projects.Project) (string, error) {
 	output, err, code := createCmdBuilder().
 		SetInput(input).
 		AddArguments([]string{"-d", "\\s", "--nth", "2", "--ansi", "--highlight-line"}).
-		ExecWithOutput()
+		CaptureOutput()
 
 	if err != nil {
 		if code == 130 {

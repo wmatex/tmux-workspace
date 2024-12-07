@@ -60,9 +60,9 @@ func paneTarget(windowID string, pane int) string {
 
 func NewSession(name, path string) (error, int) {
 	if path != "" {
-		return createCmdBuilder([]string{"new-session", "-d", "-s", name, "-c", path}).Exec()
+		return createCmdBuilder([]string{"new-session", "-d", "-s", name, "-c", path}).Exec(false)
 	} else {
-		return createCmdBuilder([]string{"new-session", "-d", "-s", name}).Exec()
+		return createCmdBuilder([]string{"new-session", "-d", "-s", name}).Exec(false)
 	}
 }
 
@@ -103,14 +103,14 @@ func CreateWindow(id, name, path string) (error, int) {
 		"-c", path,
 		"-n", name,
 		"-t", id,
-	}).Exec()
+	}).Exec(false)
 }
 
 func SelectWindow(id string) (error, int) {
 	return createCmdBuilder([]string{
 		"select-window",
 		"-t", id,
-	}).Exec()
+	}).Exec(false)
 }
 
 func SelectLayout(windowId, layout string) (error, int) {
@@ -118,7 +118,7 @@ func SelectLayout(windowId, layout string) (error, int) {
 		"select-layout",
 		"-t", windowId,
 		layout,
-	}).Exec()
+	}).Exec(false)
 }
 
 func CreatePane(windowId, id, path string) (error, int) {
@@ -126,7 +126,7 @@ func CreatePane(windowId, id, path string) (error, int) {
 		"split-window",
 		"-t", windowId,
 		"-c", path,
-	}).Exec()
+	}).Exec(false)
 }
 
 func RunCommandInPane(id, cmd string) (error, int) {
@@ -134,11 +134,11 @@ func RunCommandInPane(id, cmd string) (error, int) {
 		"send-keys",
 		"-t", id,
 		cmd, "C-m",
-	}).Exec()
+	}).Exec(false)
 }
 
 func SwitchToSession(name string) (error, int) {
-	return createCmdBuilder([]string{"switch-client", "-t", name}).Exec()
+	return createCmdBuilder([]string{"switch-client", "-t", name}).Exec(false)
 }
 
 func GetActiveSessions() ([]Session, error) {
@@ -148,7 +148,7 @@ func GetActiveSessions() ([]Session, error) {
 		fmt.Sprintf("#S%[1]s#{session_attached}%[1]s#{session_path}%[1]s#{session_activity}", SEPARATOR),
 	})
 
-	output, err, _ := cmd.ExecWithOutput()
+	output, err, _ := cmd.CaptureOutput()
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func SetHook(name, cmd string) (error, int) {
 		"set-hook",
 		"-g", name,
 		fmt.Sprintf("run-shell \"%s\"", cmd),
-	}).Exec()
+	}).Exec(false)
 }
 
 func Popup(dir, cmd string) (error, int) {
@@ -192,5 +192,5 @@ func Popup(dir, cmd string) (error, int) {
 		"popup",
 		"-d", dir,
 		"-EE", cmd,
-	}).Exec()
+	}).Exec(false)
 }

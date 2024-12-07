@@ -49,7 +49,7 @@ func (c *CmdExecBuilder) exec() *exec.Cmd {
 	return cmd
 }
 
-func (c *CmdExecBuilder) ExecWithOutput() (string, error, int) {
+func (c *CmdExecBuilder) CaptureOutput() (string, error, int) {
 	cmd := c.exec()
 
 	out, err := cmd.Output()
@@ -64,9 +64,11 @@ func (c *CmdExecBuilder) ExecWithOutput() (string, error, int) {
 	return string(out), err, 0
 }
 
-func (c *CmdExecBuilder) Exec() (error, int) {
+func (c *CmdExecBuilder) Exec(passOutput bool) (error, int) {
 	cmd := c.exec()
-	cmd.Stdout = os.Stdout
+	if passOutput {
+		cmd.Stdout = os.Stdout
+	}
 
 	err := cmd.Run()
 	if err != nil {

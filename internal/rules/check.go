@@ -6,7 +6,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/wmatex/automux/internal/cmd_exec"
 	"github.com/wmatex/automux/internal/projects"
+	"github.com/wmatex/automux/internal/utils"
 )
 
 type RuleCheck interface {
@@ -33,10 +35,26 @@ type FileExistsRule struct {
 func (r *FileExistsRule) IsSatisfiedForProject(p *projects.Project) bool {
 	filePath := path.Join(p.Path, r.filePath)
 	info, err := os.Stat(filePath)
+
 	if os.IsNotExist(err) {
 		return false
 	}
 	return !info.IsDir()
+}
+
+type ExecRule struct {
+	cmd string
+}
+
+func (r *ExecRule) IsSatisfiedForProject(p *projects.Project) bool {
+	args := utils.SplitArgs(r.cmd)
+
+	_, status := cmd_exec.
+		NewCmdExec(args[0], args[1:]).
+		SetWorkingDirectory(p.Path).
+		Exec(false)
+
+	return status == 0
 }
 
 func ruleCheckFactory(ruleName, value string) (RuleCheck, error) {
@@ -49,6 +67,10 @@ func ruleCheckFactory(ruleName, value string) (RuleCheck, error) {
 	case "file_exists":
 		return &FileExistsRule{
 			filePath: value,
+		}, nil
+	case "exec":
+		return &ExecRule{
+			cmd: value,
 		}, nil
 	}
 
