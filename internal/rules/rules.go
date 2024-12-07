@@ -7,7 +7,8 @@ import (
 )
 
 type Rules struct {
-	Rules []Rule
+	Rules     []Rule
+	Overrides map[string]Rule
 }
 
 type Rule struct {
@@ -16,8 +17,14 @@ type Rule struct {
 	Windows []tmux.Window
 }
 
-func (r *Rules) GetSatisfied(p *projects.Project) []Rule {
-	var valid []Rule
+func (r *Rules) GetSatisfied(p *projects.Project) []*Rule {
+	var valid []*Rule
+
+	override, ok := r.Overrides[p.Name]
+	if ok {
+		valid = append(valid, &override)
+		return valid
+	}
 
 	for _, rule := range r.Rules {
 		satisfies := true
@@ -30,14 +37,14 @@ func (r *Rules) GetSatisfied(p *projects.Project) []Rule {
 		}
 
 		if satisfies {
-			valid = append(valid, rule)
+			valid = append(valid, &rule)
 		}
 	}
 
 	return valid
 }
 
-func MergeWindows(rules []Rule) []*tmux.Window {
+func MergeWindows(rules []*Rule) []*tmux.Window {
 	var windows []*tmux.Window
 	for _, r := range rules {
 		for _, w := range r.Windows {

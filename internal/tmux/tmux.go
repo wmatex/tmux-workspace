@@ -191,6 +191,6 @@ func Popup(dir, cmd string) (error, int) {
 	return createCmdBuilder([]string{
 		"popup",
 		"-d", dir,
-		"-E", cmd,
+		"-EE", cmd,
 	}).Exec()
 }

@@ -54,17 +54,17 @@ to quickly create a Cobra application.`,
 				log.Fatalf("cannot create new tmux session '%s': %s\n", projectName, err)
 			}
 		} else if !project.Running {
-			err, _ = tmux.NewSession(project.Name, project.Path)
-			if err != nil {
-				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
-			}
-
 			valid := allRules.GetSatisfied(project)
 			windows := rules.MergeWindows(valid)
 
 			err = rules.SetupHooks(project, valid)
 			if err != nil {
 				log.Fatalf("cannot setup hooks for project: %s\n", err)
+			}
+
+			err, _ = tmux.NewSession(project.Name, project.Path)
+			if err != nil {
+				log.Fatalf("cannot create new tmux session '%s': %s\n", project.Name, err)
 			}
 
 			err = tmux.CreateWindowsForProject(project.Name, project.Path, windowLayout, windows)

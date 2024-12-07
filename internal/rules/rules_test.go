@@ -8,7 +8,7 @@ import (
 )
 
 func TestMergeTwoIdentical(t *testing.T) {
-	r := []Rule{
+	r := []*Rule{
 		{
 			Windows: []tmux.Window{
 				{
@@ -44,7 +44,7 @@ func TestMergeTwoIdentical(t *testing.T) {
 }
 
 func TestMerge3_2identical(t *testing.T) {
-	r := []Rule{
+	r := []*Rule{
 		{
 			Windows: []tmux.Window{
 				{
@@ -91,7 +91,7 @@ func TestMerge3_2identical(t *testing.T) {
 }
 
 func TestMerge3_2identical_different_order(t *testing.T) {
-	r := []Rule{
+	r := []*Rule{
 		{
 			Windows: []tmux.Window{
 				{
@@ -138,7 +138,7 @@ func TestMerge3_2identical_different_order(t *testing.T) {
 }
 
 func TestMerge3_MergePanes(t *testing.T) {
-	r := []Rule{
+	r := []*Rule{
 		{
 			Windows: []tmux.Window{
 				{

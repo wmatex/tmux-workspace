@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -30,7 +31,7 @@ func (h *Hook) Merge(o *Hook) {
 	// No action required
 }
 
-func SetupHooks(p *projects.Project, rules []Rule) error {
+func SetupHooks(p *projects.Project, rules []*Rule) error {
 	merged := mergeHooks(START, rules)
 
 	if len(merged) > 0 {
@@ -44,7 +45,7 @@ func SetupHooks(p *projects.Project, rules []Rule) error {
 	return err
 }
 
-func RunHooks(p *projects.Project, lifecycle uint8, rules []Rule) {
+func RunHooks(p *projects.Project, lifecycle uint8, rules []*Rule) error {
 	merged := mergeHooks(lifecycle, rules)
 	ch := make(chan int, len(merged))
 
@@ -52,16 +53,24 @@ func RunHooks(p *projects.Project, lifecycle uint8, rules []Rule) {
 		go runHook(p.Path, hook, ch)
 	}
 
+	ok := true
 	for _, hook := range merged {
 		status := <-ch
 
 		if status != 0 {
+			ok = false
 			log.Printf("hook %s failed\n", hook.Cmd)
 		}
 	}
+
+	if !ok {
+		return errors.New("start hooks failed")
+	}
+
+	return nil
 }
 
-func mergeHooks(lifecycle uint8, rules []Rule) []*Hook {
+func mergeHooks(lifecycle uint8, rules []*Rule) []*Hook {
 	var filtered []*Hook
 
 	var key string

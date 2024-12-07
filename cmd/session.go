@@ -31,7 +31,10 @@ var sessionCmd = &cobra.Command{
 		}
 		if ok {
 			valid := allRules.GetSatisfied(project)
-			rules.RunHooks(project, lifecycle, valid)
+			err := rules.RunHooks(project, lifecycle, valid)
+			if err != nil {
+				os.Exit(1)
+			}
 		}
 	},
 }
