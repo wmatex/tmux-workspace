@@ -83,12 +83,14 @@ func mergeHooks(lifecycle uint8, rules []*Rule) []*Hook {
 	}
 
 	for _, r := range rules {
-		for lc, cmd := range r.Hooks {
+		for lc, cmds := range r.Hooks {
 			if lc == key {
-				filtered = append(filtered, &Hook{
-					Lifecycle: lifecycle,
-					Cmd:       cmd,
-				})
+				for _, cmd := range cmds {
+					filtered = append(filtered, &Hook{
+						Lifecycle: lifecycle,
+						Cmd:       cmd,
+					})
+				}
 			}
 		}
 	}

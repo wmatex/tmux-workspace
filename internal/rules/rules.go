@@ -13,7 +13,7 @@ type Rules struct {
 
 type Rule struct {
 	Checks  []RuleCheck
-	Hooks   map[string]string
+	Hooks   map[string][]string
 	Windows []tmux.Window
 }
 
