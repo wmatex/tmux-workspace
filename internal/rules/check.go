@@ -1,7 +1,6 @@
 package rules
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -12,14 +11,14 @@ import (
 )
 
 type RuleCheck interface {
-	IsSatisfiedForProject(p *projects.Project) bool
+	IsSatisfiedForProject(p *projects.Project, valid []*Rule) bool
 }
 
 type DirExistsRule struct {
 	dirPath string
 }
 
-func (r *DirExistsRule) IsSatisfiedForProject(p *projects.Project) bool {
+func (r *DirExistsRule) IsSatisfiedForProject(p *projects.Project, valid []*Rule) bool {
 	dirPath := path.Join(p.Path, r.dirPath)
 	info, err := os.Stat(dirPath)
 	if os.IsNotExist(err) {
@@ -32,7 +31,7 @@ type FileExistsRule struct {
 	filePath string
 }
 
-func (r *FileExistsRule) IsSatisfiedForProject(p *projects.Project) bool {
+func (r *FileExistsRule) IsSatisfiedForProject(p *projects.Project, valid []*Rule) bool {
 	filePath := path.Join(p.Path, r.filePath)
 	info, err := os.Stat(filePath)
 
@@ -46,7 +45,7 @@ type ExecRule struct {
 	cmd string
 }
 
-func (r *ExecRule) IsSatisfiedForProject(p *projects.Project) bool {
+func (r *ExecRule) IsSatisfiedForProject(p *projects.Project, valid []*Rule) bool {
 	args := utils.SplitArgs(r.cmd)
 
 	_, status := cmd_exec.
@@ -55,6 +54,19 @@ func (r *ExecRule) IsSatisfiedForProject(p *projects.Project) bool {
 		Exec(false)
 
 	return status == 0
+}
+
+type NotActiveRule struct {
+	checkName string
+}
+
+func (r *NotActiveRule) IsSatisfiedForProject(p *projects.Project, valid []*Rule) bool {
+	for _, v := range valid {
+		if v.Name == r.checkName {
+			return false
+		}
+	}
+	return true
 }
 
 func ruleCheckFactory(ruleName, value string) (RuleCheck, error) {
@@ -72,7 +84,11 @@ func ruleCheckFactory(ruleName, value string) (RuleCheck, error) {
 		return &ExecRule{
 			cmd: value,
 		}, nil
+	case "not_active":
+		return &NotActiveRule{
+			checkName: value,
+		}, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("undefined rule '%s'", ruleName))
+	return nil, fmt.Errorf("undefined rule '%s'", ruleName)
 }

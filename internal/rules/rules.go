@@ -7,12 +7,13 @@ import (
 )
 
 type Rules struct {
-	Rules     []Rule
 	Overrides map[string]Rule
+	Rules     []Rule
 }
 
 type Rule struct {
 	Checks  []RuleCheck
+	Name    string
 	Hooks   map[string][]string
 	Windows []tmux.Window
 }
@@ -30,7 +31,7 @@ func (r *Rules) GetSatisfied(p *projects.Project) []*Rule {
 		satisfies := true
 
 		for _, check := range rule.Checks {
-			if !check.IsSatisfiedForProject(p) {
+			if !check.IsSatisfiedForProject(p, valid) {
 				satisfies = false
 				break
 			}

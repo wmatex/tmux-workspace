@@ -18,8 +18,8 @@ const (
 )
 
 type Hook struct {
-	Lifecycle uint8
 	Cmd       string
+	Lifecycle uint8
 }
 
 func (h *Hook) Id() string {
