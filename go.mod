@@ -1,4 +1,4 @@
-module github.com/wmatex/automux
+module github.com/wmatex/tmux-workspace
 
 go 1.23.1
 

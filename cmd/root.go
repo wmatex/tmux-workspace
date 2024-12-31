@@ -6,17 +6,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wmatex/automux/internal/fzf"
-	"github.com/wmatex/automux/internal/projects"
-	"github.com/wmatex/automux/internal/rules"
-	"github.com/wmatex/automux/internal/tmux"
+	"github.com/wmatex/tmux-workspace/internal/fzf"
+	"github.com/wmatex/tmux-workspace/internal/projects"
+	"github.com/wmatex/tmux-workspace/internal/rules"
+	"github.com/wmatex/tmux-workspace/internal/tmux"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-const APP_NAME = "automux"
+const APP_NAME = "tmux-workspace"
 const DEFAULT_LAYOUT = "main-vertical"
 
 var cfgFile string
@@ -115,7 +115,7 @@ func initProjectsAndRules() (*projects.Projects, *rules.Rules) {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(sessionCmd)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/automux/config.toml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $XDG_CONFIG_HOME/tmux-workspace/config.yaml)")
 }
 
 func initConfig() {
@@ -135,7 +135,7 @@ func initConfig() {
 
 		viper.AddConfigPath(configPath)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(fmt.Sprintf("%s.yaml", APP_NAME))
+		viper.SetConfigName("config.yaml")
 	}
 
 	viper.ReadInConfig()

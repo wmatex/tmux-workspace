@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
-	"github.com/wmatex/automux/internal/tmux"
+	"github.com/wmatex/tmux-workspace/internal/tmux"
 )
 
 func LoadFromConfig() (*Rules, error) {

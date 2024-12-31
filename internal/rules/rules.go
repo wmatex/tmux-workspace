@@ -1,9 +1,9 @@
 package rules
 
 import (
-	"github.com/wmatex/automux/internal/projects"
-	"github.com/wmatex/automux/internal/tmux"
-	"github.com/wmatex/automux/internal/utils"
+	"github.com/wmatex/tmux-workspace/internal/projects"
+	"github.com/wmatex/tmux-workspace/internal/tmux"
+	"github.com/wmatex/tmux-workspace/internal/utils"
 )
 
 type Rules struct {

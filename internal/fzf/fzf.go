@@ -3,8 +3,8 @@ package fzf
 import (
 	"strings"
 
-	"github.com/wmatex/automux/internal/cmd_exec"
-	"github.com/wmatex/automux/internal/projects"
+	"github.com/wmatex/tmux-workspace/internal/cmd_exec"
+	"github.com/wmatex/tmux-workspace/internal/projects"
 )
 
 func createCmdBuilder() *cmd_exec.CmdExecBuilder {

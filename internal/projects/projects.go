@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/wmatex/automux/internal/tmux"
+	"github.com/wmatex/tmux-workspace/internal/tmux"
 )
 
 type Projects struct {

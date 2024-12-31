@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wmatex/automux/internal/cmd_exec"
-	"github.com/wmatex/automux/internal/utils"
+	"github.com/wmatex/tmux-workspace/internal/cmd_exec"
+	"github.com/wmatex/tmux-workspace/internal/utils"
 )
 
 const SEPARATOR = "|"

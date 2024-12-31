@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/wmatex/automux/internal/rules"
+	"github.com/wmatex/tmux-workspace/internal/rules"
 )
 
 var projectName string

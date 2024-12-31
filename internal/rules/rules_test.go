@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wmatex/automux/internal/tmux"
+	"github.com/wmatex/tmux-workspace/internal/tmux"
 )
 
 func TestMergeTwoIdentical(t *testing.T) {

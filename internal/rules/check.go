@@ -5,9 +5,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/wmatex/automux/internal/cmd_exec"
-	"github.com/wmatex/automux/internal/projects"
-	"github.com/wmatex/automux/internal/utils"
+	"github.com/wmatex/tmux-workspace/internal/cmd_exec"
+	"github.com/wmatex/tmux-workspace/internal/projects"
+	"github.com/wmatex/tmux-workspace/internal/utils"
 )
 
 type RuleCheck interface {
