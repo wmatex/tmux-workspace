@@ -7,17 +7,34 @@ import (
 	"github.com/wmatex/tmux-workspace/internal/projects"
 )
 
+const (
+	DEFAULT_ACTION  = iota
+	SKIP_START_HOOK = iota
+)
+
+type PickResult struct {
+	Query       string
+	ProjectName string
+	Action      int
+}
+
 func createCmdBuilder() *cmd_exec.CmdExecBuilder {
 	return cmd_exec.NewCmdExec("fzf", []string{
 		"--no-sort",
 		"--print-query",
 		"--tmux", "center",
-		"--bind", "enter:replace-query+print-query",
+		"--bind", "enter:accept-or-print-query",
+		"--bind", "ctrl-o:print(SKIP_START_HOOK)+accept-or-print-query",
 		"--bind", "esc:abort",
 	})
 }
 
-func ProjectPick(projects []*projects.Project) (string, error) {
+func parseProjectName(line string) string {
+	parts := strings.Split(line, " ")
+	return parts[1]
+}
+
+func ProjectPick(projects []*projects.Project) (*PickResult, error) {
 	var input []string
 	for _, p := range projects {
 		input = append(input, (*p).Format())
@@ -30,19 +47,32 @@ func ProjectPick(projects []*projects.Project) (string, error) {
 
 	if err != nil {
 		if code == 130 {
-			return "", nil
+			return nil, nil
 		} else if code != 1 {
-			return "", err
+			return nil, err
 		}
 	}
 
-	lines := strings.Split(strings.TrimSpace(output), "\n")
-	lastLine := lines[len(lines)-1]
+	lines := strings.Split(strings.TrimRight(output, "\n"), "\n")
 
-	parts := strings.Split(lastLine, " ")
-	if len(parts) < 2 {
-		return parts[0], nil
+	pick := PickResult{}
+	pick.Query = lines[0]
+
+	if len(lines) == 1 {
+		pick.ProjectName = lines[0]
+		pick.Action = DEFAULT_ACTION
+	} else if len(lines) == 2 {
+		pick.ProjectName = parseProjectName(lines[1])
+		pick.Action = DEFAULT_ACTION
+	} else {
+		pick.ProjectName = parseProjectName(lines[2])
+		switch lines[1] {
+		case "SKIP_START_HOOK":
+			pick.Action = SKIP_START_HOOK
+		default:
+			pick.Action = DEFAULT_ACTION
+		}
 	}
 
-	return parts[1], nil
+	return &pick, nil
 }

@@ -30,13 +30,15 @@ func (h *Hook) Merge(o *Hook) {
 	// No action required
 }
 
-func SetupHooks(p *projects.Project, rules []*Rule) error {
-	merged := mergeHooks(START, rules)
+func SetupHooks(p *projects.Project, rules []*Rule, skipStartHook bool) error {
+	if !skipStartHook {
+		merged := mergeHooks(START, rules)
 
-	if len(merged) > 0 {
-		err, _ := tmux.Popup(p.Path, fmt.Sprintf("%s session start -p %s", os.Args[0], p.Name))
-		if err != nil {
-			return err
+		if len(merged) > 0 {
+			err, _ := tmux.Popup(p.Path, fmt.Sprintf("%s session start -p %s", os.Args[0], p.Name))
+			if err != nil {
+				return err
+			}
 		}
 	}
 

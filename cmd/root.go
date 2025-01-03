@@ -38,26 +38,30 @@ to quickly create a Cobra application.`,
 		p, allRules := initProjectsAndRules()
 
 		merged := p.GetNotActiveProjects()
-		projectName, err := fzf.ProjectPick(merged)
+		projectPick, err := fzf.ProjectPick(merged)
 		if err != nil {
 			log.Fatalf("fzf failed: %s\n", err)
 		}
 
-		if projectName == "" {
+		if projectPick.ProjectName == "" {
 			os.Exit(0)
 		}
 
-		project, ok := p.Map[projectName]
+		project, ok := p.Map[projectPick.ProjectName]
 		if !ok {
-			err, _ = tmux.NewSession(projectName, "")
+			err, _ = tmux.NewSession(projectPick.ProjectName, "")
 			if err != nil {
-				log.Fatalf("cannot create new tmux session '%s': %s\n", projectName, err)
+				log.Fatalf("cannot create new tmux session '%s': %s\n", projectPick.ProjectName, err)
 			}
 		} else if !project.Running {
 			valid := allRules.GetSatisfied(project)
 			windows := rules.MergeWindows(valid)
 
-			err = rules.SetupHooks(project, valid)
+			skipStartHook := false
+			if projectPick.Action == fzf.SKIP_START_HOOK {
+				skipStartHook = true
+			}
+			err = rules.SetupHooks(project, valid, skipStartHook)
 			if err != nil {
 				log.Fatalf("cannot setup hooks for project: %s\n", err)
 			}
@@ -73,9 +77,9 @@ to quickly create a Cobra application.`,
 			}
 		}
 
-		err, _ = tmux.SwitchToSession(projectName)
+		err, _ = tmux.SwitchToSession(projectPick.ProjectName)
 		if err != nil {
-			log.Fatalf("cannot switch to session '%s': %s\n", projectName, err)
+			log.Fatalf("cannot switch to session '%s': %s\n", projectPick.ProjectName, err)
 		}
 	},
 }
