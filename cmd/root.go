@@ -43,7 +43,7 @@ to quickly create a Cobra application.`,
 			log.Fatalf("fzf failed: %s\n", err)
 		}
 
-		if projectPick.ProjectName == "" {
+		if projectPick == nil || projectPick.ProjectName == "" {
 			os.Exit(0)
 		}
 
