@@ -49,7 +49,8 @@ to quickly create a Cobra application.`,
 
 		project, ok := p.Map[projectPick.ProjectName]
 		if !ok {
-			err, _ = tmux.NewSession(projectPick.ProjectName, "")
+			home, _ := homedir.Dir()
+			err, _ = tmux.NewSession(projectPick.ProjectName, home)
 			if err != nil {
 				log.Fatalf("cannot create new tmux session '%s': %s\n", projectPick.ProjectName, err)
 			}
