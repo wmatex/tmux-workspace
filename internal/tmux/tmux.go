@@ -66,6 +66,10 @@ func NewSession(name, path string) (error, int) {
 	}
 }
 
+func KillSession(name string) (error, int) {
+	return createCmdBuilder([]string{"kill-session", "-t", name}).Exec(false)
+}
+
 func CreateWindowsForProject(session, path, layout string, windows []*Window) error {
 	for i, w := range windows {
 		windowId := windowTarget(session, i+1)
